@@ -26,6 +26,7 @@ export const useSearchStore = create<SearchState & {
     setIsLoading: (isLoading: boolean) => void;
     setError: (error: string | null) => void;
     resetSearch: () => void;
+    clearSearch: () => void; // Reintroducir clearSearch
 }>()(
     persist(
         (set) => ({
@@ -111,6 +112,6 @@ export const useSearch = () => {
         ...store,
         handleSearch,
         performSearch,
-        clearSearch: store.clearSearch,
+        clearSearch: store.clearSearch
     };
 };

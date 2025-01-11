@@ -7,49 +7,65 @@ import Header from "@/component/header";
 
 import { ClipboardList } from 'lucide-react';
 import ScoringDashboard from "@/component/score";
+import {AuthState} from "@/types/user";
 
 const ScoringPage = () => {
     const router = useRouter();
     const toast = useToast();
     const [isLoading, setIsLoading] = useState(true);
-
-    // Obtener el estado de autenticación
-    const authState = JSON.parse(localStorage.getItem('authState') || '{"user": null}');
-    const isAuthenticated = !!authState.user;
+    const [authState, setAuthState] = useState<AuthState>( {
+        user: {
+            userId: '',
+            username: '',
+            email: '',
+            roles: [],
+            group_id: '',
+            session_id: '',
+            chat_status: '',
+            last_login: '',
+            created_at: '',
+            updated_at: ''
+        },
+        token: null,
+    });
 
     useEffect(() => {
-        // Verificar autenticación y rol
-        const checkAuth = () => {
-            const auth = localStorage.getItem('authState');
-            if (!auth) {
-                toast({
-                    title: 'Acceso denegado',
-                    description: 'Debes iniciar sesión para acceder a esta página',
-                    status: 'error',
-                    duration: 3000,
-                    isClosable: true,
-                });
-                router.push('/');
-                return;
-            }
+        if (typeof window !== 'undefined') {
+            // Verificar autenticación y rol
+            const checkAuth = () => {
+                const savedAuth = localStorage.getItem('authState');
+                if (!savedAuth) {
+                    toast({
+                        title: 'Acceso denegado',
+                        description: 'Debes iniciar sesión para acceder a esta página',
+                        status: 'error',
+                        duration: 3000,
+                        isClosable: true,
+                    });
+                    router.push('/');
+                    return;
+                }
 
-            const { user } = JSON.parse(auth);
-            if (!user?.roles?.includes('ADMIN')) {
-                toast({
-                    title: 'Acceso denegado',
-                    description: 'No tienes permisos para acceder a esta página',
-                    status: 'error',
-                    duration: 3000,
-                    isClosable: true,
-                });
-                router.push('/');
-                return;
-            }
+                const parsedAuth = JSON.parse(savedAuth);
+                setAuthState(parsedAuth);
 
-            setIsLoading(false);
-        };
+                if (!parsedAuth.user?.roles?.includes('ADMIN')) {
+                    toast({
+                        title: 'Acceso denegado',
+                        description: 'No tienes permisos para acceder a esta página',
+                        status: 'error',
+                        duration: 3000,
+                        isClosable: true,
+                    });
+                    router.push('/');
+                    return;
+                }
 
-        checkAuth();
+                setIsLoading(false);
+            };
+
+            checkAuth();
+        }
     }, [router, toast]);
 
     if (isLoading) {
@@ -62,7 +78,7 @@ const ScoringPage = () => {
         );
     }
 
-    if (!isAuthenticated) {
+    if (!authState) {
         router.push('/');
         return null;
     }

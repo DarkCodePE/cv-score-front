@@ -90,6 +90,11 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({ profileData }) => {
             </Container>
         );
     }
+    const handleTabChange = (index: number) => {
+        // Mapear índices a valores de string
+        const tabs = ['experience', 'education', 'profile'];
+        setActiveTab(tabs[index]);
+    };
 
     const handleDownloadCV = () => {
         const lastDocument = profileData.documents?.[profileData.documents.length - 1];
@@ -266,7 +271,7 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({ profileData }) => {
 
                 {/* Right Column - Main Content */}
                 <Box flex={1}>
-                    <Tabs colorScheme="brand" onChange={(index) => setActiveTab(index)}>
+                    <Tabs colorScheme="brand" onChange={handleTabChange}>
                         <TabList>
                             <Tab>Experiencia</Tab>
                             <Tab>Educación</Tab>

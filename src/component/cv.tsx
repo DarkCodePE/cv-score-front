@@ -15,9 +15,12 @@ import {profileService} from "@/service/profile";
 interface CVUploadComponentProps {
     onProfileData: (data: any) => void;
     userId: string;  // Añadimos userId como prop requerida
+    isProcessing: boolean;
 }
 
-const CVUploadComponent: React.FC<CVUploadComponentProps> = ({ onProfileData, userId }) => {
+const CVUploadComponent: React.FC<CVUploadComponentProps> = ({
+                                                                 onProfileData,
+                                                                 userId }) => {
     const [isDragging, setIsDragging] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);

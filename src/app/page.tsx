@@ -1,51 +1,33 @@
 'use client';
-import React, {useEffect, useState} from 'react';
+import dynamic from 'next/dynamic';
+import React, {ReactNode, Suspense, useEffect, useState} from 'react';
 import {
   Box,
   Container,
-  Heading,
-  Text,
-  Input,
-  Button,
-  HStack,
-  VStack,
-  Icon,
-  InputGroup,
-  InputLeftElement,
-  Flex,
   useDisclosure,
   useToast,
   Modal,
   ModalOverlay,
-  ModalContent,
-  MenuButton,
-  Avatar,
-  MenuItem,
-  MenuList,
-  Menu, MenuDivider, ModalHeader, ModalCloseButton, ModalBody
+  ModalContent, Spinner,
 } from '@chakra-ui/react';
-import {Search, MapPin, Badge, ChevronDownIcon, User, Settings, LogOut} from 'lucide-react';
+
 import axios from 'axios';
-import {AuthResponse, AuthState, LoginFormData, LoginRequest, RegisterRequest} from "@/types/user";
+
 import {LoginComponent} from "@/component/login";
-import CVUploadComponent from "@/component/cv";
+
 import Header from "@/component/header";
 import HomeView from "@/component/HomeViewProps";
-import ProfileComponent from "@/component/profile";
+
 import {useRouter} from "next/navigation";
+import {AuthState, LoginFormData} from "@/types/user";
 
 
-type View = 'home' | 'profile' | 'search';
+
 const AUTH_SERVER = process.env.AUTH_SERVER || 'http://localhost:8080';
 
 const HomePage = () => {
   const router = useRouter();
   const toast = useToast();
-  const [currentView, setCurrentView] = useState<View>('home');
-  const [searchConfig, setSearchConfig] = useState({
-    term: '',
-    location: ''
-  });
 
   // Modales
   const {
@@ -60,33 +42,50 @@ const HomePage = () => {
   } = useDisclosure();
 
   // Estado de autenticación
-  const [authState, setAuthState] = useState<AuthState>(() => {
+  const [authState, setAuthState] = useState<AuthState>( {
+    user: {
+      userId: '',
+      username: '',
+      email: '',
+      roles: [],
+      group_id: '',
+      session_id: '',
+      chat_status: '',
+      last_login: '',
+      created_at: '',
+      updated_at: ''
+    },
+    token: null,
+  });
+
+  useEffect(() => {
+    // Solo ejecuta esta lógica en el cliente
     if (typeof window !== 'undefined') {
       const savedAuth = localStorage.getItem('authState');
       if (savedAuth) {
         const parsed = JSON.parse(savedAuth);
+        setAuthState(parsed);
         if (parsed.token) {
           axios.defaults.headers.common['Authorization'] = `Bearer ${parsed.token}`;
         }
-        return parsed;
       }
     }
-    return { user: null, token: null };
-  });
+  }, []);
 
   const handleAuth = async (isLogin: boolean, formData: LoginFormData) => {
     try {
       const endpoint = isLogin ? '/auth/login' : '/auth/register';
       const response = await axios.post(`${AUTH_SERVER}${endpoint}`, formData);
 
-      setAuthState({
+      const newAuthState = {
         user: response.data,
-        token: response.data.token
-      });
-      localStorage.setItem('authState', JSON.stringify({
-        user: response.data,
-        token: response.data.token
-      }));
+        token: response.data.token,
+      };
+
+      setAuthState(newAuthState);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('authState', JSON.stringify(newAuthState));
+      }
 
       axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
 
@@ -100,8 +99,8 @@ const HomePage = () => {
 
       onLoginClose();
       onCVModalOpen();
-
     } catch (error) {
+      console.error('Error during authentication:', error);
       toast({
         title: isLogin ? 'Error de Login' : 'Error de Registro',
         description: 'Hubo un error. Por favor, intenta nuevamente.',
@@ -128,37 +127,39 @@ const HomePage = () => {
     });
   };
 
-  const handleProfileData = (data: any) => {
-    localStorage.setItem('profileData', JSON.stringify(data));
-    onCVModalClose();
-    router.push('/profile');
-
-    toast({
-      title: 'Perfil Actualizado',
-      description: 'Tu CV ha sido procesado exitosamente.',
-      status: 'success',
-      duration: 3000,
-      isClosable: true,
-    });
-  };
-
-  const handleSearch = (term: string, location: string) => {
-    // Redirigir a SearchPage con parámetros
-    router.push(`/search?term=${term}&location=${location}`);
-  };
-
+  if (!authState) {
+    return (
+        <Box bg="background.900" minH="100vh">
+          <Container>
+            <p>Loading...</p>
+          </Container>
+        </Box>
+    );
+  }
+  interface SuspenseWrapperProps {
+    children: ReactNode;
+  }
+  // Componente envuelto en Suspense
+  const SuspenseWrapper: React.FC<SuspenseWrapperProps> = ({ children }) => (
+      <Suspense fallback={<Spinner />}>
+        {children}
+      </Suspense>
+  );
   return (
       <Box bg="background.900" minH="100vh">
-        <Header
-            authState={authState}
-            onLogout={handleLogout}
-            onLoginClick={onLoginOpen}
-            onProfileClick={() => router.push('/profile')}
-            onLogoClick={() => router.push('/')}
-        />
+        <SuspenseWrapper>
+          <Header
+              authState={authState}
+              onLogout={handleLogout}
+              onLoginClick={onLoginOpen}
+              onProfileClick={() => router.push('/profile')}
+              onLogoClick={() => router.push('/')}
+          />
+        </SuspenseWrapper>
+
 
         <Container maxW="container.xl">
-          <HomeView isAuthenticated={!!authState.user} />
+          <HomeView isAuthenticated={!!authState?.user} />
         </Container>
 
         {/* Modal de Login */}
@@ -173,4 +174,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default dynamic(() => Promise.resolve(HomePage), { ssr: false });

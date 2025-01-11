@@ -15,7 +15,6 @@ import {
     VStack,
     Text,
     Heading,
-    HStack,
     Icon,
     Button,
     useToast,
@@ -23,9 +22,12 @@ import {
 import ProfileComponent from "@/component/profile";
 import Header from "@/component/header";
 import CVUploadComponent from "@/component/cv";
-import { Building2, Briefcase, Search, UserCircle2, WandSparkles } from "lucide-react";
+import {UserCircle2, WandSparkles } from "lucide-react";
 import { css, keyframes } from '@emotion/react';
-import { profileService } from "@/service/profile";
+import {profileService} from "@/service/profile";
+import axios from "axios";
+import {ProfileSchema} from "@/types/profile";
+import {AuthState} from "@/types/user";
 
 const gradientAnimation = keyframes`
     0% {
@@ -52,25 +54,68 @@ const magicButtonStyle = css`
 const ProfilePage = () => {
     const router = useRouter();
     const toast = useToast();
-    const [profileData, setProfileData] = useState(null);
+    const [authState, setAuthState] = useState<AuthState>( {
+        user: {
+            userId: '',
+            username: '',
+            email: '',
+            roles: [],
+            group_id: '',
+            session_id: '',
+            chat_status: '',
+            last_login: '',
+            created_at: '',
+            updated_at: ''
+        },
+        token: null,
+    });
+    const [profileData, setProfileData] = useState<ProfileSchema>({
+        id: '',
+        user_id: '',
+        first_name: '',
+        last_name: '',
+        headline: '',
+        about: '',
+        location: null,
+        contact_info: {
+            email: '',
+            phone: undefined,
+        },
+        skills: [],
+        languages: [],
+        experiences: [],
+        education: [],
+        documents: [],
+    });
     const [isLoading, setIsLoading] = useState(true);
     const [isProcessing, setIsProcessing] = useState(false);
     const { isOpen, onOpen, onClose } = useDisclosure();
 
-    const authState = JSON.parse(localStorage.getItem('authState') || '{"user": null}');
-    const isAuthenticated = !!authState.user;
+    useEffect(() => {
+        // Carga authState desde localStorage en el cliente
+        if (typeof window !== 'undefined') {
+            const savedAuth = localStorage.getItem('authState');
+            if (savedAuth) {
+                const parsed = JSON.parse(savedAuth);
+                setAuthState(parsed);
+                axios.defaults.headers.common['Authorization'] = `Bearer ${parsed.token}`;
+            }
+        }
+    }, []);
 
-    const fetchProfile = async (userId) => {
+    const fetchProfile = async (userId: string) => {
         try {
             const profile = await profileService.getProfile(userId);
             if (profile) {
                 setProfileData(profile);
-                localStorage.setItem('profileData', JSON.stringify(profile));
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem('profileData', JSON.stringify(profile));
+                }
                 return true;
             }
             return false;
-        } catch (error) {
-            if (error.response?.status === 404) {
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error) && error.response?.status === 404) {
                 return false; // Perfil no existe
             }
             console.error('Error fetching profile:', error);
@@ -101,30 +146,31 @@ const ProfilePage = () => {
             }
         };
 
-        init();
-    }, [router, authState.user?.userId]);
+        if (authState) {
+            init();
+        }
+    }, [authState, isProcessing, router]);
 
-    const handleProfileData = async (data) => {
+    const handleProfileData = async (data: ProfileSchema) => {
         setIsProcessing(true);
         try {
             if (profileData) {
-                // Actualización de perfil
                 const updatedProfile = await profileService.updateProfile({
                     ...data,
-                    user_id: authState.user.userId,
+                    user_id: authState?.user?.userId,
                 });
                 setProfileData(updatedProfile);
-                localStorage.setItem('profileData', JSON.stringify(updatedProfile));
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem('profileData', JSON.stringify(updatedProfile));
+                }
             } else {
-                // Creación inicial del perfil - los datos vienen del procesamiento del CV
                 setProfileData(data);
-                localStorage.setItem('profileData', JSON.stringify(data));
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem('profileData', JSON.stringify(data));
+                }
 
-                // Esperar un momento para asegurar que el backend ha procesado todo
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
-                // Obtener el perfil actualizado del backend
-                await fetchProfile(authState.user.userId);
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                await fetchProfile(authState?.user?.userId || '');
             }
 
             onClose();
@@ -160,7 +206,7 @@ const ProfilePage = () => {
         );
     }
 
-    if (!isAuthenticated) {
+    if (!authState) {
         router.push('/');
         return null;
     }
@@ -202,7 +248,7 @@ const ProfilePage = () => {
                     <VStack spacing={4} textAlign="center">
                         <Icon as={UserCircle2} boxSize={16} color="brand.500" />
                         <Heading size="lg">
-                            ¡Bienvenido a KUALI.ai, {authState.user.username}!
+                            ¡Bienvenido a KUALI.ai, {authState?.user?.username}!
                         </Heading>
                         <Text fontSize="xl" color="whiteAlpha.800">
                             Completa tu perfil profesional para comenzar a encontrar las mejores oportunidades
@@ -262,7 +308,7 @@ const ProfilePage = () => {
                     <ModalBody pb={6}>
                         <CVUploadComponent
                             onProfileData={handleProfileData}
-                            userId={authState.user.userId}
+                            userId={authState?.user?.userId || ''}
                             isProcessing={isProcessing}
                         />
                     </ModalBody>
