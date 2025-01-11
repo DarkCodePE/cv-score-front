@@ -23,7 +23,7 @@ import {AuthState, LoginFormData} from "@/types/user";
 
 
 
-const AUTH_SERVER = process.env.AUTH_SERVER || 'http://localhost:8080';
+const AUTH_SERVER = process.env.NEXT_PUBLIC_AUTH_SERVER || 'http://localhost:8080';
 
 const HomePage = () => {
   const router = useRouter();

@@ -1,7 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { useToast } from '@chakra-ui/react';
 
-const AUTH_SERVER = process.env.AUTH_SERVER || 'http://localhost:8080';
+const AUTH_SERVER = process.env.NEXT_PUBLIC_AUTH_SERVER || 'http://localhost:8080';
 
 // Interceptor para peticiones
 axios.interceptors.request.use(

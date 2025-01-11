@@ -21,7 +21,7 @@ interface SearchFormProps {
     variant?: 'default' | 'compact';
     onSubmit?: () => void;
 }
-const AUTH_SERVER = process.env.AUTH_SERVER || 'http://localhost:8080';
+const AUTH_SERVER = process.env.NEXT_PUBLIC_AUTH_SERVER || 'http://localhost:8080';
 const gradientAnimation = keyframes`
     0% {
         background-position: 0% 50%;
