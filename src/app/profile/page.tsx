@@ -1,4 +1,6 @@
 'use client';
+
+import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -54,127 +56,76 @@ const magicButtonStyle = css`
 const ProfilePage = () => {
     const router = useRouter();
     const toast = useToast();
-    const [authState, setAuthState] = useState<AuthState>( {
-        user: {
-            userId: '',
-            username: '',
-            email: '',
-            roles: [],
-            group_id: '',
-            session_id: '',
-            chat_status: '',
-            last_login: '',
-            created_at: '',
-            updated_at: ''
-        },
-        token: null,
-    });
-    const [profileData, setProfileData] = useState<ProfileSchema>({
-        id: '',
-        user_id: '',
-        first_name: '',
-        last_name: '',
-        headline: '',
-        about: '',
-        location: null,
-        contact_info: {
-            email: '',
-            phone: undefined,
-        },
-        skills: [],
-        languages: [],
-        experiences: [],
-        education: [],
-        documents: [],
-    });
+    const [authState, setAuthState] = useState<AuthState | null>(null);
+    const [profileData, setProfileData] = useState<ProfileSchema | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isProcessing, setIsProcessing] = useState(false);
     const { isOpen, onOpen, onClose } = useDisclosure();
 
+    // Efecto para cargar el authState inicial
     useEffect(() => {
-        // Carga authState desde localStorage en el cliente
-        if (typeof window !== 'undefined') {
-            const savedAuth = localStorage.getItem('authState');
-            if (savedAuth) {
-                const parsed = JSON.parse(savedAuth);
-                setAuthState(parsed);
-                axios.defaults.headers.common['Authorization'] = `Bearer ${parsed.token}`;
-            }
+        const savedAuth = localStorage.getItem('authState');
+        if (savedAuth) {
+            const parsed = JSON.parse(savedAuth);
+            setAuthState(parsed);
+            axios.defaults.headers.common['Authorization'] = `Bearer ${parsed.token}`;
+        } else {
+            router.push('/');
         }
-    }, []);
+    }, [router]);
 
-    const fetchProfile = async (userId: string) => {
-        try {
-            const profile = await profileService.getProfile(userId);
-            if (profile) {
-                setProfileData(profile);
-                if (typeof window !== 'undefined') {
-                    localStorage.setItem('profileData', JSON.stringify(profile));
+    // Efecto separado para cargar el perfil una vez que tenemos el authState
+    useEffect(() => {
+        const fetchProfileData = async () => {
+            if (authState?.user?.userId) {
+                try {
+                    const profile = await profileService.getProfile(authState.user.userId);
+                    if (profile) {
+                        setProfileData(profile);
+                        localStorage.setItem('profileData', JSON.stringify(profile));
+                    }
+                } catch (error) {
+                    if (!axios.isAxiosError(error) || error.response?.status !== 404) {
+                        console.error('Error fetching profile:', error);
+                        toast({
+                            title: 'Error',
+                            description: 'No se pudo cargar tu perfil. Por favor, intenta de nuevo.',
+                            status: 'error',
+                            duration: 5000,
+                            isClosable: true,
+                        });
+                    }
+                } finally {
+                    setIsLoading(false);
                 }
-                return true;
-            }
-            return false;
-        } catch (error: unknown) {
-            if (axios.isAxiosError(error) && error.response?.status === 404) {
-                return false; // Perfil no existe
-            }
-            console.error('Error fetching profile:', error);
-            toast({
-                title: 'Error',
-                description: 'No se pudo cargar tu perfil. Por favor, intenta de nuevo.',
-                status: 'error',
-                duration: 5000,
-                isClosable: true,
-            });
-            return false;
-        }
-    };
-
-    useEffect(() => {
-        const init = async () => {
-            if (!authState.user?.userId) {
-                router.push('/');
-                return;
-            }
-
-            const hasProfile = await fetchProfile(authState.user.userId);
-            setIsLoading(false);
-
-            // Si no tiene perfil y no está en proceso de creación, mostrar onboarding
-            if (!hasProfile && !isProcessing) {
-                return;
             }
         };
 
         if (authState) {
-            init();
+            fetchProfileData();
         }
-    }, [authState, isProcessing, router]);
+    }, [authState, toast]);
 
     const handleProfileData = async (data: ProfileSchema) => {
+        if (!authState?.user?.userId) return;
+
         setIsProcessing(true);
         try {
+            const userId = authState.user.userId;
+
             if (profileData) {
                 const updatedProfile = await profileService.updateProfile({
                     ...data,
-                    user_id: authState?.user?.userId,
+                    user_id: userId,
                 });
                 setProfileData(updatedProfile);
-                if (typeof window !== 'undefined') {
-                    localStorage.setItem('profileData', JSON.stringify(updatedProfile));
-                }
+                localStorage.setItem('profileData', JSON.stringify(updatedProfile));
             } else {
                 setProfileData(data);
-                if (typeof window !== 'undefined') {
-                    localStorage.setItem('profileData', JSON.stringify(data));
-                }
-
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-                await fetchProfile(authState?.user?.userId || '');
+                localStorage.setItem('profileData', JSON.stringify(data));
             }
 
             onClose();
-
             toast({
                 title: profileData ? 'Perfil actualizado' : 'Perfil creado',
                 description: 'Tu perfil ha sido procesado exitosamente',
@@ -195,6 +146,7 @@ const ProfilePage = () => {
             setIsProcessing(false);
         }
     };
+
 
     if (isLoading) {
         return (
@@ -318,4 +270,5 @@ const ProfilePage = () => {
     );
 };
 
-export default ProfilePage;
+//export default ProfilePage;
+export default dynamic(() => Promise.resolve(ProfilePage), { ssr: false });
