@@ -2,7 +2,7 @@
 import axios from 'axios';
 import {ProfileSchema} from "@/types/profile";
 
-const PROFILE_SERVER = process.env.PROFILE_SERVER || 'http://localhost:8094';
+const PROFILE_SERVER = process.env.NEXT_PUBLIC_PROFILE_SERVER || 'http://localhost:8094';
 
 
 export const profileService = {
