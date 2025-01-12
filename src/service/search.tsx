@@ -2,7 +2,7 @@
 import axios from 'axios';
 import {SearchFilters, SearchResponse, Job, JobApplicationCreate, ApplicationRequest} from '@/types/search';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8091';  // Ajusta al puerto de tu backend
+const API_URL = process.env.NEXT_PUBLIC_JOB_SERVER || 'http://localhost:8091';  // Ajusta al puerto de tu backend
 
 export const searchService = {
     async searchJobs(

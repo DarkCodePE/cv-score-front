@@ -28,9 +28,9 @@ import {
 import { Search, ChevronDown, ChevronRight, Calendar, User, Briefcase, MapPin, DollarSign, RefreshCw } from 'lucide-react';
 import axios from 'axios';
 
-const SCORING_SERVER = process.env.SCORING_SERVER || 'http://localhost:8095';
-const PROFILE_SERVER = process.env.PROFILE_SERVER || 'http://localhost:8094';
-const JOB_SERVER = process.env.JOB_SERVER || 'http://localhost:8091';
+const SCORING_SERVER = process.env.NEXT_PUBLIC_SCORING_SERVER || 'http://localhost:8095';
+const PROFILE_SERVER = process.env.NEXT_PUBLIC_PROFILE_SERVER || 'http://localhost:8094';
+const JOB_SERVER = process.env.NEXT_PUBLIC_JOB_SERVER || 'http://localhost:8091';
 
 interface JobOffer {
     title: string;
