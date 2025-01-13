@@ -15,10 +15,10 @@ import {
     VStack,
     Icon,
 } from '@chakra-ui/react';
-import { User, Settings, LogOut, ChevronDown } from 'lucide-react';
+import {User, Settings, LogOut, ChevronDown, ClipboardList} from 'lucide-react';
 import { AuthState } from "@/types/user";
 import SearchForm from "@/form/search";
-import {usePathname, useSearchParams} from "next/navigation";
+import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {useSearch} from "@/hook/useSearch";
 
 interface HeaderProps {
@@ -36,6 +36,7 @@ const Header = ({
                     onProfileClick,
                     onLogoClick
                 }: HeaderProps) => {
+    const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const { searchTerm, location, clearSearch } = useSearch();
@@ -51,7 +52,7 @@ const Header = ({
         clearSearch(); // Asegúrate de que useSearch tenga esta función para resetear los valores.
         onLogoClick();
     };
-
+    const isAdmin = authState.user?.roles?.includes('ADMIN');
     return (
         <Box borderBottom="1px" borderColor="whiteAlpha.200" py={4}>
             <Container maxW="container.xl">
@@ -72,7 +73,6 @@ const Header = ({
                         >
                             KUALI.ai
                         </Text>
-
                         <HStack spacing={4}>
                             {authState.user ? (
                                 <>
@@ -127,6 +127,16 @@ const Header = ({
                                             >
                                                 Mi Perfil
                                             </MenuItem>
+                                            {isAdmin && (
+                                                <MenuItem
+                                                    icon={<Icon as={ClipboardList} />}
+                                                    onClick={() => router.push('/score')}
+                                                    _hover={{ bg: 'whiteAlpha.100' }}
+                                                    fontSize="sm"
+                                                >
+                                                    Evaluaciones
+                                                </MenuItem>
+                                            )}
                                             <MenuItem
                                                 icon={<Icon as={Settings} />}
                                                 _hover={{ bg: 'whiteAlpha.100' }}
