@@ -71,7 +71,7 @@ const Header = ({
                                 transition: 'all 0.2s'
                             }}
                         >
-                            KUALI.ai
+                            CV Analyzer
                         </Text>
                         <HStack spacing={4}>
                             {authState.user ? (

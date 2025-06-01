@@ -68,10 +68,10 @@ const HomeView = ({isAuthenticated }: HomeViewProps) => {
                         bgClip="text"
                         css={magicButtonStyle}
                     >
-                        Encuentra el talento perfecto para tu equipo
+                        Potencia tu carrera con un CV que destaque
                     </Heading>
                     <Text fontSize="xl" mb={12}>
-                        Conectamos a las mejores empresas con los profesionales más calificados
+                        Analizamos tu currículum frente a las ofertas de empleo y te decimos cómo mejorarlo antes de postularte.
                     </Text>
 
                     {/* Search Form */}
