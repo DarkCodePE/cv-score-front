@@ -121,7 +121,7 @@ const HomeView = ({isAuthenticated }: HomeViewProps) => {
         `}
                         >
                             <Image
-                                src="https://cdn.prod.website-files.com/6320941e9612f79b0e2f61b1/649b5794e7ee6905bc16a49b_avla%20logo.jpg"
+                                src="https://www.ucv.edu.pe/media/logo_completo_color-6E6VDOZV.png"
                                 alt="AVLA logo"
                                 width="100%"
                                 height="100%"
@@ -129,77 +129,6 @@ const HomeView = ({isAuthenticated }: HomeViewProps) => {
                             />
                         </Box>
 
-                        <Box
-                            css={css`
-            filter: brightness(0.9) grayscale(100%);
-            transition: all 0.3s ease;
-            width: 160px;
-            height: 45px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            &:hover {
-                filter: brightness(1) grayscale(0%);
-                transform: translateY(-2px);
-            }
-        `}
-                        >
-                            <Image
-                                src="https://cdn.prod.website-files.com/6320941e9612f79b0e2f61b1/66280d0af4abddab8bedd105_Concentrix%20Logo%20color.png"
-                                alt="Concentrix logo"
-                                width="100%"
-                                height="100%"
-                                style={{ objectFit: 'contain' }}
-                            />
-                        </Box>
-
-                        <Box
-                            css={css`
-            filter: brightness(0.9) grayscale(100%);
-            transition: all 0.3s ease;
-            width: 120px;
-            height: 45px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            &:hover {
-                filter: brightness(1) grayscale(0%);
-                transform: translateY(-2px);
-            }
-        `}
-                        >
-                            <Image
-                                src="https://cdn.prod.website-files.com/6320941e9612f79b0e2f61b1/65943d5e1ecc1503a0f0feae_Logo_yape_partner.png"
-                                alt="Yape logo"
-                                width="100%"
-                                height="100%"
-                                style={{ objectFit: 'contain' }}
-                            />
-                        </Box>
-
-                        <Box
-                            css={css`
-            filter: brightness(0.9) grayscale(100%);
-            transition: all 0.3s ease;
-            width: 120px;
-            height: 45px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            &:hover {
-                filter: brightness(1) grayscale(0%);
-                transform: translateY(-2px);
-            }
-        `}
-                        >
-                            <Image
-                                src="https://cdn.prod.website-files.com/6320941e9612f79b0e2f61b1/65943db19dcc72d1ebd9e118_Logo-Konecta.png"
-                                alt="Konecta logo"
-                                width="100%"
-                                height="100%"
-                                style={{ objectFit: 'contain' }}
-                            />
-                        </Box>
                     </Flex>
                     </VStack>
                 </Container>
