@@ -200,7 +200,7 @@ const ProfilePage = () => {
                     <VStack spacing={4} textAlign="center">
                         <Icon as={UserCircle2} boxSize={16} color="brand.500" />
                         <Heading size="lg">
-                            ¡Bienvenido a KUALI.ai, {authState?.user?.username}!
+                            ¡Bienvenido a CV Analyzer, {authState?.user?.username}!
                         </Heading>
                         <Text fontSize="xl" color="whiteAlpha.800">
                             Completa tu perfil profesional para comenzar a encontrar las mejores oportunidades

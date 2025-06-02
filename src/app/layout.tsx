@@ -6,7 +6,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Kuali.ai - Encuentra el talento perfecto",
+  title: "CV Analyzer - Encuentra el talento perfecto",
   description: "Plataforma de búsqueda de empleo y gestión de talento",
 };
 
